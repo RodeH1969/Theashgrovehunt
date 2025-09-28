@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ashgrove Hunt</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            color: white;
+            padding: 20px 20px 15px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+            gap: 10px;
+        }
+
+        .header-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .header-sponsor {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .header-logo {
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .sponsor-logo {
+            width: 81px !important;
+            max-width: 81px !important;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin: 0 2px;
+        }
+
+        .header p {
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .age-restriction {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            color: #e65100;
+            padding: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        .content {
+            padding: 20px 20px;
+        }
+
+        .puzzle-progress {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .puzzle-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+
+        .clue-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .clue-slot {
+            aspect-ratio: 1;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            position: relative;
+            flex-direction: column;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .clue-slot.collected {
+            border: 2px solid #4caf50;
+            background: #e8f5e8;
+        }
+
+        .clue-slot.consecutive {
+            border: 2px solid #ff6b6b;
+            background: #ffe8e8;
+        }
+
+        .clue-slot.final {
+            grid-column: 2;
+            border-color: #ff6b6b;
+        }
+
+        .clue-slot.final.collected {
+            border-color: #4caf50;
+            background: linear-gradient(45deg, #e8f5e8, #fff3e0);
+        }
+
+        .clue-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .clue-slot.collected .clue-image {
+            cursor: pointer;
+        }
+
+        .clue-slot.collected:hover {
+            transform: scale(1.05);
+            transition: transform 0.2s;
+        }
+
+        /* Expanded Clue Modal */
+        .clue-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clue-modal {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .clue-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .clue-modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .clue-modal-close {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clue-modal-close:hover {
+            background: #d32f2f;
+        }
+
+        .clue-modal-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .clue-number {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .vendor-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c8 100%);
+            border: 2px solid #4caf50;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(76,175,80,0.2);
+        }
+
+        .vendor-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .vendor-image {
+            width: 150px;
+            height: auto;
+            border-radius: 10px;
+            margin: 15px auto;
+            display: block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        .vendor-address {
+            color: #388e3c;
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+
+        .tap-for-details {
+            color: #2e7d32;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .sponsor-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #2196f3;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(33,150,243,0.2);
+        }
+
+        .sponsor-title {
+            font-size: 14px;
+            color: white;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .sponsor-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0d47a1;
+            margin-bottom: 15px;
+        }
+
+        .sponsor-logo {
+            width: 120px;
+            height: auto;
+            border-radius: 10px;
+            margin: 0 auto 10px auto;
+            display: block;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .sponsor-click-hint {
+            color: #1976d2;
+            font-size: 11px;
+            font-style: italic;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-area.processing {
+            border-color: #ffa726;
+            background: #fff8f0;
+        }
+
+        .camera-icon {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-area {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .answer-submission {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .answer-submission h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .submit-answer-btn {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            color: #4caf50;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        .submit-answer-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .puzzle-complete {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .puzzle-complete h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .final-image {
+            width: 200px;
+            height: auto;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .winner-announcement {
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .winner-announcement h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .rules-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rules-section h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .rules-section ul {
+            font-size: 13px;
+            color: #666;
+            padding-left: 20px;
+        }
+
+        .rules-section li {
+            margin-bottom: 5px;
+        }
+
+        .contact-info {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        /* Live Game Sash */
+        .live-game-sash {
+            position: fixed;
+            top: 25px;
+            right: -30px;
+            width: 150px;
+            background: #dc3545;
+            color: white;
+            text-align: center;
+            padding: 8px 0;
+            transform: rotate(45deg);
+            z-index: 999;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Popup Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 320px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .popup-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .popup-close {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .popup-close:hover {
+            background: #d32f2f;
+        }
+
+        .popup-image {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            border-radius: 10px;
+            margin: 15px auto;
+            display: block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .popup-content {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .daily-receipts {
+            background: #fff3e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .daily-receipts h4 {
+            color: #f57c00;
+            margin-bottom: 10px;
+        }
+
+        .receipt-days {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .day-slot {
+            background: #fff;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .day-slot.collected {
+            border-color: #4caf50;
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .day-slot.consecutive {
+            border-color: #ff6b6b;
+            background: #ffe8e8;
+            color: #c62828;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 15px 10px 15px;
+            }
+            
+            .header-content {
+                margin-top: 5px;
+                gap: 8px;
+            }
+            
+            .header-logo {
+                margin-bottom: 5px;
+            }
+            
+            .header-text p {
+                font-size: 14px;
+            }
+            
+            .age-restriction {
+                margin-top: 3px;
+                padding: 5px;
+            }
+        }
+
+        @media (max-width: 350px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-text {
+                text-align: center;
+                margin-bottom: 5px;
+            }
+            
+            .header-text p {
+                font-size: 14px;
+            }
+            
+            .sponsor-logo {
+                width: 122px !important;
+                max-width: 122px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Live Game Sash -->
+    <div class="live-game-sash">Game #1 is Live!</div>
+    
+    <div class="container">
+        <div class="header" id="header">
+            <img src="ashgrove.png" class="header-logo" alt="The Ashgrove Hunt Logo">
+            <div class="header-content">
+                <div class="header-text">
+                    <p><span style="color: #dc3545; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Hunt the clues</span><br><span style="color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Solve the puzzle</span><br><span style="color: #2196f3; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Claim the prize</span></p>
+                </div>
+                <div class="header-sponsor">
+                    <img src="CP.png" class="sponsor-logo" alt="CP">
+                    <img src="Balta.png" class="sponsor-logo" alt="Balta">
+                </div>
+            </div>
+        </div>
+
+        <div class="age-restriction">
+            ⚠️ Must be 18 years or older to participate
+        </div>
+
+        <div class="content">
+            <div class="rules-section">
+                <h4>📋 How to Play</h4>
+                <ul>
+                    <li>Visit Le Cafe and make a purchase on 4 <strong><em>different days</em></strong></li>
+                    <li>Upload receipt photos to collect puzzle clues</li>
+                    <li>Collect 4 clues to unlock the 5th bonus clue</li>
+                    <li>First person to solve wins their choice: 4 pack Balta XPA cans OR bottle of Charles Pelletier Blanc de Blancs!</li>
+                </ul>
+            </div>
+
+            <div class="vendor-section">
+                <div class="vendor-name">Le Cafe</div>
+                <img src="game 1/lecafe.png" class="vendor-image" onclick="showVendorPopup()" alt="Le Cafe">
+                <div class="vendor-address">486 Waterworks Rd, Ashgrove, Brisbane</div>
+                <div style="color: #333; font-style: italic; font-size: 12px; font-weight: bold; margin: 8px 0;">great coffee & amazing food!</div>
+                <div class="tap-for-details">Tap image for details</div>
+            </div>
+
+            <div class="puzzle-progress">
+                <div class="puzzle-title">Game #1 Clues</div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                
+                <div class="clue-grid">
+                    <div class="clue-slot" id="clue-slot-1">
+                        <span class="clue-number">1</span>
+                        <small>Day 1</small>
+                    </div>
+                    <div class="clue-slot" id="clue-slot-2">
+                        <span class="clue-number">2</span>
+                        <small>Day 2</small>
+                    </div>
+                    <div class="clue-slot" id="clue-slot-3">
+                        <span class="clue-number">3</span>
+                        <small>Day 3</small>
+                    </div>
+                    <div class="clue-slot" id="clue-slot-4">
+                        <span class="clue-number">4</span>
+                        <small>Day 4</small>
+                    </div>
+                    <div class="clue-slot final" id="clue-slot-5">
+                        <span class="clue-number">5</span>
+                        <div style="color: #dc3545; font-weight: bold; font-size: 10px;">Bonus Clue</div>
+                        <div style="font-size: 36px;">🎁</div>
+                    </div>
+                </div>
+                
+                <div id="puzzle-complete-area"></div>
+            </div>
+
+            <div class="daily-receipts">
+                <h4>📅 Receipt Collection Progress</h4>
+                <p>Visit on different days between Sept 29 - Oct 4, 2025</p>
+                <div class="receipt-days">
+                    <div class="day-slot" id="day-1">Day 1<br>?</div>
+                    <div class="day-slot" id="day-2">Day 2<br>?</div>
+                    <div class="day-slot" id="day-3">Day 3<br>?</div>
+                    <div class="day-slot" id="day-4">Day 4<br>?</div>
+                </div>
+            </div>
+
+            <div class="sponsor-section">
+                <div class="sponsor-title">Game #1 brought to you by</div>
+                <div class="sponsor-name">Rod Harding<br>Aged Care Placement Agent</div>
+                <img src="game 1/Rod.png" class="sponsor-logo" onclick="showSponsorPopup()" alt="Rod Harding">
+                <div class="sponsor-click-hint">click the image for Rod's details</div>
+            </div>
+
+            <div class="upload-area" onclick="document.getElementById('receipt-file').click()">
+                <div class="camera-icon">📷</div>
+                <div class="upload-text">Upload receipt to claim clue</div>
+                <input type="file" id="receipt-file" class="file-input" accept="image/*">
+            </div>
+
+            <div class="preview-area" id="preview-area" style="display: none;">
+                <img id="preview-image" class="preview-image" alt="Receipt preview">
+            </div>
+
+            <button class="submit-btn" id="submit-btn" disabled onclick="submitReceipt()">
+                Process Receipt
+            </button>
+
+            <div class="contact-info">
+                <strong>Important:</strong> Keep your physical receipts! Admin will verify all receipts before awarding prizes.<br><br>
+                Questions? Contact game admin: airbrandr@gmail.com<br>
+                Game runs until prize is claimed
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Popup -->
+    <div class="popup-overlay" id="vendor-popup-overlay" onclick="closeVendorPopup()">
+        <div class="popup" onclick="event.stopPropagation()">
+            <div class="popup-header">
+                <h3 class="popup-title">Le Cafe</h3>
+                <button class="popup-close" onclick="closeVendorPopup()">×</button>
+            </div>
+            <img class="popup-image" src="game 1/lecafe.png" alt="Le Cafe">
+            <div class="popup-content">
+                <p><strong>Address:</strong><br>486 Waterworks Rd, Ashgrove, Brisbane</p>
+                <br>
+                <p><strong>Hours:</strong><br>Monday - Friday: 6:30am - 3:00pm<br>Weekends: 8:00am - 2:00pm</p>
+                <br>
+                <p><strong>Game Requirements:</strong><br>Visit on 4 different days between September 29 - October 4, 2025. Upload valid receipts to collect clues!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sponsor Popup -->
+    <div class="popup-overlay" id="sponsor-popup-overlay" onclick="closeSponsorPopup()">
+        <div class="popup" onclick="event.stopPropagation()">
+            <div class="popup-header">
+                <h3 class="popup-title">Rod Harding</h3>
+                <button class="popup-close" onclick="closeSponsorPopup()">×</button>
+            </div>
+            <img class="popup-image" src="game 1/Rod2.png" alt="Rod Harding Bio">
+            <div class="popup-content">
+                <p><strong>Aged Care Placement Agent</strong></p>
+                <br>
+                <p>Rod Harding specializes in helping families find the perfect aged care placement for their loved ones. With years of experience and deep knowledge of Brisbane's aged care facilities, Rod provides compassionate guidance during important decisions.</p>
+                <br>
+                <p><strong>Mobile: 0459 754 708</strong></p>
+                <p><strong>Email: roderickharding@hotmail.com</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clue Expansion Modal -->
+    <div class="clue-modal-overlay" id="clue-modal-overlay" onclick="closeClueModal()">
+        <div class="clue-modal" onclick="event.stopPropagation()">
+            <div class="clue-modal-header">
+                <h3 class="clue-modal-title" id="clue-modal-title">Clue</h3>
+                <button class="clue-modal-close" onclick="closeClueModal()">×</button>
+            </div>
+            <img class="clue-modal-image" id="clue-modal-image" alt="Expanded Clue">
+        </div>
+    </div>
+
+    <script>
+        // Game configuration
+        const gameVendor = {
+            name: 'Le Cafe',
+            abn: '123 456 789',
+            image: 'game 1/lecafe.png',
+            address: '486 Waterworks Rd, Ashgrove, Brisbane',
+            validDateStart: '2025-09-29',
+            validDateEnd: '2025-10-04'
+        };
+
+        // Game state
+        let gameData = {
+            receiptDays: [],
+            collectedClues: [],
+            submittedInvoices: new Set(),
+            puzzleComplete: false,
+            puzzleAttempted: false,
+            playerName: '',
+            playerMobile: '',
+            submissionTime: null,
+            receiptImages: {}
+        };
+
+        // Prevent multiple simultaneous submissions
+        let submissionInProgress = false;
+
+        // Clue images
+        const clueImages = {
+            1: 'game 1/ml clue 1.png',
+            2: 'game 1/ml clue 2.png', 
+            3: 'game 1/ml clue 3.png',
+            4: 'game 1/ml clue 4.png',
+            5: 'game 1/ml clue 5.png'
+        };
+
+        const finalPuzzleImage = 'game 1/monalisa.png';
+
+        // Popup functions
+        function showVendorPopup() {
+            document.getElementById('vendor-popup-overlay').style.display = 'block';
+        }
+
+        function closeVendorPopup() {
+            document.getElementById('vendor-popup-overlay').style.display = 'none';
+        }
+
+        function showSponsorPopup() {
+            document.getElementById('sponsor-popup-overlay').style.display = 'block';
+        }
+
+        function closeSponsorPopup() {
+            document.getElementById('sponsor-popup-overlay').style.display = 'none';
+        }
+
+        // Load saved data
+        function loadGameData() {
+            const saved = localStorage.getItem('ashgroveHuntData');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                gameData = {
+                    ...gameData,
+                    ...parsed,
+                    submittedInvoices: new Set(parsed.submittedInvoices || []),
+                    receiptDays: parsed.receiptDays || []
+                };
+            }
+            
+            if (!gameData.playerId) {
+                gameData.playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                saveGameData();
+            }
+        }
+
+        function saveGameData() {
+            const dataToSave = {
+                ...gameData,
+                submittedInvoices: Array.from(gameData.submittedInvoices)
+            };
+            localStorage.setItem('ashgroveHuntData', JSON.stringify(dataToSave));
+        }
+
+        function updateUI() {
+            updateProgressBar();
+            updateClueSlots();
+            updateDaySlots();
+            lockReceiptUploadsIfComplete();
+            checkPuzzleComplete();
+        }
+
+        function updateProgressBar() {
+            const progress = (gameData.collectedClues.length / 5) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function updateClueSlots() {
+            for (let i = 1; i <= 5; i++) {
+                const slot = document.getElementById(`clue-slot-${i}`);
+                if (gameData.collectedClues.includes(i)) {
+                    slot.classList.add('collected');
+                    if (i <= 4) {
+                        slot.innerHTML = `
+                            <span class="clue-number">${i}</span>
+                            <img src="${clueImages[i]}" class="clue-image" alt="Clue ${i}" onclick="expandClue(${i})">
+                        `;
+                    } else {
+                        slot.innerHTML = `
+                            <span class="clue-number">5</span>
+                            <img src="${clueImages[5]}" class="clue-image" alt="Bonus Clue" onclick="expandClue(5)">
+                        `;
+                    }
+                } else if (i === 5) {
+                    slot.innerHTML = `
+                        <span class="clue-number">5</span>
+                        <div style="color: #dc3545; font-weight: bold; font-size: 10px;">Bonus Clue</div>
+                        <div style="font-size: 36px;">🎁</div>
+                    `;
+                }
+            }
+        }
+
+        function expandClue(clueNumber) {
+            const modalOverlay = document.getElementById('clue-modal-overlay');
+            const modalTitle = document.getElementById('clue-modal-title');
+            const modalImage = document.getElementById('clue-modal-image');
+            
+            modalTitle.textContent = clueNumber === 5 ? 'Bonus Clue #5' : `Clue #${clueNumber}`;
+            modalImage.src = clueImages[clueNumber];
+            modalOverlay.style.display = 'flex';
+        }
+
+        function closeClueModal() {
+            document.getElementById('clue-modal-overlay').style.display = 'none';
+        }
+
+        function updateDaySlots() {
+            const sortedDays = [...gameData.receiptDays].sort();
+            const consecutive = areConsecutiveDays(sortedDays);
+            
+            for (let i = 1; i <= 4; i++) {
+                const slot = document.getElementById(`day-${i}`);
+                if (sortedDays[i-1]) {
+                    const date = new Date(sortedDays[i-1]);
+                    slot.innerHTML = `Day ${i}<br>${date.getDate()}/${date.getMonth()+1}`;
+                    slot.classList.add('collected');
+                    if (consecutive && sortedDays.length >= 4) {
+                        slot.classList.add('consecutive');
+                    }
+                } else {
+                    slot.innerHTML = `Day ${i}<br>?`;
+                    slot.classList.remove('collected', 'consecutive');
+                }
+            }
+        }
+
+        function lockReceiptUploadsIfComplete() {
+            const uploadArea = document.querySelector('.upload-area');
+            const submitBtn = document.getElementById('submit-btn');
+            const previewArea = document.getElementById('preview-area');
+            
+            if (gameData.receiptDays.length >= 4) {
+                // Hide upload area and show completion message
+                uploadArea.style.display = 'none';
+                submitBtn.style.display = 'none';
+                previewArea.style.display = 'none';
+                
+                // Check if completion message already exists
+                let completionMessage = document.getElementById('upload-completion-message');
+                if (!completionMessage) {
+                    completionMessage = document.createElement('div');
+                    completionMessage.id = 'upload-completion-message';
+                    completionMessage.style.cssText = `
+                        background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c8 100%);
+                        border: 2px solid #4caf50;
+                        border-radius: 15px;
+                        padding: 20px;
+                        text-align: center;
+                        margin-bottom: 20px;
+                        box-shadow: 0 4px 12px rgba(76,175,80,0.2);
+                    `;
+                    completionMessage.innerHTML = `
+                        <div style="color: #2e7d32; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+                            🎉 All Receipts Collected!
+                        </div>
+                        <div style="color: #388e3c; font-size: 14px;">
+                            You've successfully uploaded receipts from 4 different days.<br>
+                            Receipt uploads are now complete - focus on solving the puzzle!
+                        </div>
+                    `;
+                    
+                    // Insert before contact info
+                    const contactInfo = document.querySelector('.contact-info');
+                    contactInfo.parentNode.insertBefore(completionMessage, contactInfo);
+                }
+            } else {
+                // Show upload area if not complete
+                uploadArea.style.display = 'block';
+                submitBtn.style.display = 'block';
+                
+                // Remove completion message if it exists
+                const completionMessage = document.getElementById('upload-completion-message');
+                if (completionMessage) {
+                    completionMessage.remove();
+                }
+            }
+        }
+
+        function areConsecutiveDays(dates) {
+            if (dates.length < 4) return false;
+            
+            const sortedDates = dates.map(d => new Date(d)).sort((a, b) => a - b);
+            
+            for (let i = 1; i < sortedDates.length; i++) {
+                const prevDate = sortedDates[i-1];
+                const currDate = sortedDates[i];
+                const diffDays = (currDate - prevDate) / (1000 * 60 * 60 * 24);
+                
+                if (diffDays !== 1) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function checkPuzzleComplete() {
+            if (gameData.puzzleAttempted) {
+                const completeArea = document.getElementById('puzzle-complete-area');
+                if (gameData.puzzleComplete) {
+                    showPuzzleComplete();
+                } else {
+                    completeArea.innerHTML = `
+                        <div class="winner-announcement" style="background: linear-gradient(45deg, #ff6b6b, #ff8a80);">
+                            <h2>Whoops, that's a miss!</h2>
+                            <p>Make sure you come back and play game #2 for the chance to win a cool prize!</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+            
+            if (gameData.receiptDays.length >= 4 && !gameData.collectedClues.includes(5)) {
+                gameData.collectedClues.push(5);
+                saveGameData();
+                
+                setTimeout(() => {
+                    alert('🎉 All clues collected! You can now solve the final puzzle!');
+                    updateClueSlots();
+                    showAnswerSubmission();
+                }, 1000);
+            } else if (gameData.collectedClues.length === 5 && !gameData.puzzleComplete) {
+                showAnswerSubmission();
+            }
+        }
+
+        function showAnswerSubmission() {
+            if (gameData.puzzleAttempted) {
+                showPreviousAttemptMessage();
+                return;
+            }
+            
+            const completeArea = document.getElementById('puzzle-complete-area');
+            const consecutiveBonus = areConsecutiveDays(gameData.receiptDays) ? '<p style="color: #ff6b6b; font-weight: bold;">🎉 Consecutive Days Bonus Unlocked!</p>' : '';
+            
+            completeArea.innerHTML = `
+                <div class="answer-submission">
+                    <h3>🧩 Final Challenge!</h3>
+                    <p>You've collected all the clues! Complete the form below to claim your prize.</p>
+                    ${consecutiveBonus}
+                    
+                    <input type="text" class="answer-input" id="player-first-name" placeholder="Your First Name" maxlength="30" style="margin-bottom: 10px;">
+                    
+                    <input type="tel" class="answer-input" id="player-mobile" placeholder="Your Mobile Number" maxlength="15" style="margin-bottom: 10px;">
+                    
+                    <input type="text" class="answer-input" id="puzzle-answer" placeholder="What famous artwork do you see?" maxlength="50" onkeypress="if(event.key==='Enter') submitAnswer()">
+                    
+                    <button class="submit-answer-btn" onclick="submitAnswer()">Submit Final Answer</button>
+                    <p style="font-size: 12px; margin-top: 10px; opacity: 0.8;">All fields required • Be specific about the artwork • One attempt per mobile number!</p>
+                </div>
+            `;
+        }
+
+        function showPreviousAttemptMessage() {
+            const completeArea = document.getElementById('puzzle-complete-area');
+            if (gameData.puzzleComplete) {
+                showPuzzleComplete();
+            } else {
+                completeArea.innerHTML = `
+                    <div class="winner-announcement" style="background: linear-gradient(45deg, #ff6b6b, #ff8a80);">
+                        <h2>Whoops, that's a miss!</h2>
+                        <p>Make sure you come back and play game #2 for the chance to win a cool prize!</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function submitAnswer() {
+            // Prevent multiple simultaneous submissions
+            if (submissionInProgress) {
+                return;
+            }
+
+            const firstNameInput = document.getElementById('player-first-name');
+            const mobileInput = document.getElementById('player-mobile');
+            const answerInput = document.getElementById('puzzle-answer');
+            
+            const firstName = firstNameInput.value.trim();
+            const mobile = mobileInput.value.trim();
+            const userAnswer = answerInput.value.trim();
+            
+            // IMMEDIATE duplicate prevention - check localStorage first
+            const submissionKey = `submission_${mobile}`;
+            const existingSubmission = localStorage.getItem(submissionKey);
+            
+            if (existingSubmission || gameData.puzzleAttempted) {
+                showDuplicateMessage();
+                return;
+            }
+            
+            // Validate all fields
+            if (!firstName) {
+                firstNameInput.style.border = '3px solid #f44336';
+                setTimeout(() => firstNameInput.style.border = 'none', 2000);
+                showErrorMessage('Please enter your first name');
+                return;
+            }
+            
+            if (!mobile) {
+                mobileInput.style.border = '3px solid #f44336';
+                setTimeout(() => mobileInput.style.border = 'none', 2000);
+                showErrorMessage('Please enter your mobile number');
+                return;
+            }
+            
+            if (!userAnswer) {
+                answerInput.style.border = '3px solid #f44336';
+                setTimeout(() => answerInput.style.border = 'none', 2000);
+                showErrorMessage('Please enter your answer');
+                return;
+            }
+            
+            // Set submission in progress flag
+            submissionInProgress = true;
+            
+            // IMMEDIATELY mark as attempted and lock the mobile number
+            gameData.puzzleAttempted = true;
+            localStorage.setItem(submissionKey, JSON.stringify({
+                mobile: mobile,
+                timestamp: Date.now(),
+                status: 'processing'
+            }));
+            saveGameData();
+            
+            // Disable the form immediately
+            firstNameInput.disabled = true;
+            mobileInput.disabled = true;
+            answerInput.disabled = true;
+            document.querySelector('.submit-answer-btn').disabled = true;
+            document.querySelector('.submit-answer-btn').innerHTML = 'Checking submission...';
+            
+            try {
+                // Double-check against Cloudinary
+                const cloudinaryCheck = await checkExistingSubmission(mobile);
+                
+                if (cloudinaryCheck) {
+                    showDuplicateMessage();
+                    return;
+                }
+                
+                document.querySelector('.submit-answer-btn').innerHTML = 'Submitting answer...';
+                
+                // Record submission data
+                const submissionTime = new Date().toISOString();
+                const uniqueId = `${mobile}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                const submissionData = {
+                    uniqueId: uniqueId,
+                    playerName: firstName,
+                    playerMobile: mobile,
+                    playerAnswer: userAnswer,
+                    submissionTime: submissionTime,
+                    timestamp: new Date().toLocaleString(),
+                    receiptDays: gameData.receiptDays,
+                    receiptImages: gameData.receiptImages || {},
+                    playerId: gameData.playerId,
+                    consecutiveDays: areConsecutiveDays(gameData.receiptDays)
+                };
+                
+                // Upload submission to Cloudinary
+                const uploadResult = await uploadSubmissionToCloudinary(submissionData, uniqueId);
+                console.log('Upload successful:', uploadResult);
+                
+                // Update local storage with success status
+                localStorage.setItem(submissionKey, JSON.stringify({
+                    mobile: mobile,
+                    timestamp: Date.now(),
+                    status: 'completed',
+                    submissionTime: submissionTime
+                }));
+                
+                // Check if answer is correct
+                const isCorrect = validateAnswer(userAnswer.toLowerCase());
+                
+                if (isCorrect) {
+                    gameData.submissionTime = submissionTime;
+                    gameData.puzzleComplete = true;
+                    gameData.playerAnswer = userAnswer;
+                    gameData.playerName = firstName;
+                    gameData.playerMobile = mobile;
+                    saveGameData();
+                    showPuzzleComplete();
+                } else {
+                    showIncorrectAnswer();
+                }
+                
+            } catch (error) {
+                console.error('Submission failed:', error);
+                
+                localStorage.setItem(submissionKey, JSON.stringify({
+                    mobile: mobile,
+                    timestamp: Date.now(),
+                    status: 'failed'
+                }));
+                
+                showIncorrectAnswer();
+            } finally {
+                submissionInProgress = false;
+            }
+        }
+
+        function validateAnswer(userAnswer) {
+            // Correct answer patterns
+            const correctAnswers = [
+                'mona lisa',
+                'monalisa', 
+                'the mona lisa',
+                'la gioconda',
+                'la joconde',
+                'mona lisa by leonardo da vinci',
+                'leonardo da vinci mona lisa',
+                'lisa del giocondo',
+                'mona lisa painting',
+                'mona lisa portrait',
+                'the mona lisa painting',
+                'leonardo mona lisa',
+                'da vinci mona lisa'
+            ];
+            
+            // Clean the user's answer
+            const cleanAnswer = userAnswer.toLowerCase().trim();
+            
+            // Must be at least 8 characters to prevent "mona" from matching
+            if (cleanAnswer.length < 8) {
+                return false;
+            }
+            
+            // Exact matches first
+            if (correctAnswers.includes(cleanAnswer)) {
+                return true;
+            }
+            
+            // Check for key phrases that must be present
+            const hasMonaLisa = cleanAnswer.includes('mona lisa') || cleanAnswer.includes('monalisa');
+            const hasLaGioconda = cleanAnswer.includes('la gioconda') || cleanAnswer.includes('la joconde');
+            const hasLisaDelGiocondo = cleanAnswer.includes('lisa del giocondo');
+            
+            return hasMonaLisa || hasLaGioconda || hasLisaDelGiocondo;
+        }
+
+        async function checkExistingSubmission(mobileNumber) {
+            try {
+                const searchUrl = 'https://api.cloudinary.com/v1_1/dfc53bbgl/resources/search';
+                const searchQuery = `folder:ashgrove_hunt_submissions AND filename:*${mobileNumber.slice(-4)}*`;
+                
+                const response = await fetch(searchUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        expression: searchQuery,
+                        max_results: 10
+                    })
+                });
+                
+                if (!response.ok) {
+                    return false;
+                }
+                
+                const results = await response.json();
+                
+                for (const resource of results.resources || []) {
+                    const filename = resource.filename || resource.public_id;
+                    if (filename.includes(mobileNumber)) {
+                        return true;
+                    }
+                }
+                
+                return false;
+                
+            } catch (error) {
+                console.error('Error checking existing submissions:', error);
+                return false;
+            }
+        }
+
+        function uploadSubmissionToCloudinary(submissionData, uniqueId) {
+            const textContent = JSON.stringify(submissionData, null, 2);
+            const blob = new Blob([textContent], { type: 'application/json' });
+            const fileName = `submission_${submissionData.playerName}_${uniqueId}.json`;
+            
+            const formData = new FormData();
+            formData.append('file', blob, fileName);
+            formData.append('upload_preset', 'hunt_receipts');
+            formData.append('folder', 'ashgrove_hunt_submissions');
+            formData.append('resource_type', 'raw');
+            formData.append('public_id', `submission_${uniqueId}`);
+            
+            return fetch('https://api.cloudinary.com/v1_1/dfc53bbgl/raw/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json());
+        }
+
+        function showDuplicateMessage() {
+            const completeArea = document.getElementById('puzzle-complete-area');
+            completeArea.innerHTML = `
+                <div class="winner-announcement" style="background: linear-gradient(45deg, #ff6b6b, #ff8a80);">
+                    <h2>Submission Already Recorded!</h2>
+                    <p>This mobile number has already been used for a submission.</p>
+                    <p>Only one attempt is allowed per mobile number.</p>
+                    <p>Make sure you come back and play game #2 for the chance to win a cool prize!</p>
+                </div>
+            `;
+        }
+
+        function showIncorrectAnswer() {
+            const completeArea = document.getElementById('puzzle-complete-area');
+            
+            completeArea.innerHTML = `
+                <div class="winner-announcement" style="background: linear-gradient(45deg, #ff6b6b, #ff8a80);">
+                    <h2>Whoops, that's a miss!</h2>
+                    <p>Make sure you come back and play game #2 for the chance to win a cool prize!</p>
+                </div>
+            `;
+        }
+
+        function showErrorMessage(message) {
+            const submitBtn = document.querySelector('.submit-answer-btn');
+            const existingHint = submitBtn.parentNode.querySelector('.error-hint');
+            if (existingHint) existingHint.remove();
+            
+            const hintText = document.createElement('p');
+            hintText.className = 'error-hint';
+            hintText.style.color = '#ff5722';
+            hintText.style.fontSize = '13px';
+            hintText.style.marginTop = '10px';
+            hintText.style.textAlign = 'center';
+            hintText.textContent = message;
+            
+            submitBtn.parentNode.appendChild(hintText);
+            
+            setTimeout(() => {
+                if (hintText.parentNode) hintText.remove();
+            }, 4000);
+        }
+
+        function showPuzzleComplete() {
+            const completeArea = document.getElementById('puzzle-complete-area');
+            const consecutiveBonus = areConsecutiveDays(gameData.receiptDays) ? ' 🎉 Consecutive Days Bonus!' : '';
+            
+            completeArea.innerHTML = `
+                <div class="puzzle-complete">
+                    <h2>🏆 Puzzle Solved!${consecutiveBonus}</h2>
+                    <p><strong>The Mona Lisa</strong><br>by Leonardo da Vinci</p>
+                    <img src="${finalPuzzleImage}" class="final-image" alt="Mona Lisa">
+                </div>
+                <div class="winner-announcement">
+                    <h2>Congratulations on solving the puzzle ${gameData.playerName}!</h2>
+                    <p>Your submission has been recorded at ${new Date(gameData.submissionTime).toLocaleString()}</p>
+                    <p>We will contact you on your mobile shortly if you were the 1st to solve the puzzle. You are in with a great shot!</p>
+                    <p>In the meantime think now about what prize you want to choose:</p>
+                    <p><strong>• 4 pack Balta XPA cans<br>• OR bottle of Charles Pelletier Blanc de Blancs</strong></p>
+                    <p>Make sure you have a valid ID showing you are 18+ years old.</p>
+                    <p style="font-size: 14px; margin-top: 15px; font-weight: bold;">
+                        We will contact you on: ${gameData.playerMobile}
+                    </p>
+                </div>
+            `;
+            
+            notifyAdmin(gameData.playerName, gameData.submissionTime);
+        }
+
+        function notifyAdmin(playerName, submissionTime) {
+            // Save to both local admin notifications AND a shared admin key
+            const adminNotifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+            
+            const playerData = {
+                playerName: playerName,
+                playerId: gameData.playerId,
+                playerMobile: gameData.playerMobile,
+                playerAnswer: gameData.playerAnswer,
+                receiptDays: gameData.receiptDays,
+                receiptImages: gameData.receiptImages || {},
+                collectedClues: gameData.collectedClues,
+                consecutiveDays: areConsecutiveDays(gameData.receiptDays),
+                submissionTime: submissionTime,
+                timestamp: new Date().toISOString(),
+                source: 'mobile_submission'
+            };
+            
+            // Save to local device
+            adminNotifications.push(playerData);
+            localStorage.setItem('adminNotifications', JSON.stringify(adminNotifications));
+            
+            // ALSO save to a shared key that admin portal can access from any device
+            const sharedSubmissions = JSON.parse(localStorage.getItem('ashgroveHuntSharedSubmissions') || '[]');
+            
+            // Check if this submission already exists (prevent duplicates)
+            const existingSubmission = sharedSubmissions.find(s => 
+                s.playerMobile === playerData.playerMobile && s.submissionTime === playerData.submissionTime
+            );
+            
+            if (!existingSubmission) {
+                sharedSubmissions.push(playerData);
+                localStorage.setItem('ashgroveHuntSharedSubmissions', JSON.stringify(sharedSubmissions));
+            }
+            
+            console.log('Admin notification saved to both local and shared storage:', playerData);
+            
+            // Also try to send to external service for cross-device sync
+            sendToExternalService(playerData);
+        }
+
+        function sendToExternalService(submissionData) {
+            // Send submission data to an external service for cross-device access
+            // Using a free webhook service like webhook.site or requestbin.com
+            const webhookUrl = 'https://webhook.site/3c7b1a3e-4d2e-4c5a-9b1f-8e7d6c5b4a3f'; // Replace with your webhook URL
+            
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'ashgrove_hunt_submission',
+                    timestamp: new Date().toISOString(),
+                    data: submissionData
+                })
+            }).catch(error => {
+                console.error('Failed to send to webhook:', error);
+                // Non-critical error, continue anyway
+            });
+        }
+
+        // File upload handling
+        document.getElementById('receipt-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewArea = document.getElementById('preview-area');
+                    const previewImage = document.getElementById('preview-image');
+                    
+                    previewImage.src = e.target.result;
+                    previewArea.style.display = 'block';
+                    
+                    document.getElementById('submit-btn').disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function submitReceipt() {
+            const submitBtn = document.getElementById('submit-btn');
+            const uploadArea = document.querySelector('.upload-area');
+            
+            submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+            submitBtn.disabled = true;
+            uploadArea.classList.add('processing');
+            
+            setTimeout(() => {
+                processReceipt();
+            }, 2000);
+        }
+
+        function processReceipt() {
+            const fileInput = document.getElementById('receipt-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('No file selected');
+                resetForm();
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            uploadToCloudinary(file)
+                .then(result => {
+                    if (result.error) {
+                        throw new Error(result.error.message);
+                    }
+                    
+                    const clueNumber = gameData.receiptDays.length + 1;
+                    gameData.receiptDays.push(today);
+                    gameData.collectedClues.push(clueNumber);
+                    
+                    if (!gameData.receiptImages) {
+                        gameData.receiptImages = {};
+                    }
+                    
+                    const dayKey = today + '_' + Date.now();
+                    gameData.receiptImages[dayKey] = {
+                        url: result.secure_url,
+                        publicId: result.public_id,
+                        uploadTime: new Date().toISOString(),
+                        submissionDate: today
+                    };
+                    
+                    const receiptRef = 'REF' + Date.now();
+                    gameData.submittedInvoices.add(receiptRef);
+                    
+                    saveGameData();
+                    
+                    alert(`🎉 Clue ${clueNumber} collected! Receipt uploaded successfully for admin verification.`);
+                    updateUI();
+                    resetForm();
+                })
+                .catch(error => {
+                    console.error('Upload failed:', error);
+                    alert('Failed to upload receipt. Please try again. Error: ' + error.message);
+                    resetForm();
+                });
+        }
+
+        function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'hunt_receipts');
+            formData.append('folder', 'ashgrove_hunt_receipts');
+            
+            return fetch('https://api.cloudinary.com/v1_1/dfc53bbgl/image/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json());
+        }
+
+        function resetForm() {
+            const submitBtn = document.getElementById('submit-btn');
+            const uploadArea = document.querySelector('.upload-area');
+            const previewArea = document.getElementById('preview-area');
+            
+            submitBtn.innerHTML = 'Process Receipt';
+            submitBtn.disabled = true;
+            uploadArea.classList.remove('processing');
+            previewArea.style.display = 'none';
+            document.getElementById('receipt-file').value = '';
+        }
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeVendorPopup();
+                closeSponsorPopup();
+                closeClueModal();
+            }
+        });
+
+        // Initialize
+        loadGameData();
+        updateUI();
+    </script>
+</body>
+</html>
